@@ -6,11 +6,13 @@ use epd::*;
 mod epd_draw_target;
 use epd_draw_target::*;
 
-use embedded_graphics::prelude::*;
 use embedded_graphics::geometry::AnchorPoint;
-use embedded_graphics::primitives::{Circle, Rectangle, Triangle, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment};
+use embedded_graphics::mono_font::{ascii::FONT_10X20, MonoTextStyle};
+use embedded_graphics::prelude::*;
+use embedded_graphics::primitives::{
+    Circle, PrimitiveStyle, PrimitiveStyleBuilder, Rectangle, StrokeAlignment, Triangle,
+};
 use embedded_graphics::text::{Alignment, Text};
-use embedded_graphics::mono_font::{MonoTextStyle, ascii::FONT_10X20};
 
 use cortex_m_rt::entry;
 use embedded_hal::digital::v2::OutputPin;
@@ -76,8 +78,13 @@ fn main() -> ! {
 
     let thin_stroke = PrimitiveStyle::with_stroke(EpdColor::Black, 1);
     let thick_stroke = PrimitiveStyle::with_stroke(EpdColor::Black, 3);
-    let border_stroke = PrimitiveStyleBuilder::new()
+    let border_stroke_red = PrimitiveStyleBuilder::new()
         .stroke_color(EpdColor::Red)
+        .stroke_width(3)
+        .stroke_alignment(StrokeAlignment::Inside)
+        .build();
+    let border_stroke_black = PrimitiveStyleBuilder::new()
+        .stroke_color(EpdColor::Black)
         .stroke_width(3)
         .stroke_alignment(StrokeAlignment::Inside)
         .build();
@@ -89,9 +96,18 @@ fn main() -> ! {
     // Draw a 3px wide outline around the display.
     display
         .bounding_box()
-        .resized(display.bounding_box().size - Size::new(4, 4), AnchorPoint::Center)
-        .into_styled(border_stroke)
-        .draw(&mut display).ok();
+        .resized(
+            display.bounding_box().size - Size::new(4, 4),
+            AnchorPoint::Center,
+        )
+        .into_styled(border_stroke_red)
+        .draw(&mut display)
+        .ok();
+    display
+        .bounding_box()
+        .into_styled(border_stroke_black)
+        .draw(&mut display)
+        .ok();
 
     // Draw a triangle.
     Triangle::new(
@@ -100,27 +116,31 @@ fn main() -> ! {
         Point::new(16 + 8, yoffset),
     )
     .into_styled(thin_stroke)
-    .draw(&mut display).ok();
+    .draw(&mut display)
+    .ok();
 
     // Draw a filled square
     Rectangle::new(Point::new(52, yoffset), Size::new(16, 16))
         .into_styled(fill)
-        .draw(&mut display).ok();
+        .draw(&mut display)
+        .ok();
 
     // Draw a circle with a 3px wide stroke.
     Circle::new(Point::new(88, yoffset), 17)
         .into_styled(thick_stroke)
-        .draw(&mut display).ok();
+        .draw(&mut display)
+        .ok();
 
     // Draw centered text.
-    let text = "embedded\ngraphics";
+    let text = "embedded\ngraphics\nwoof :3";
     Text::with_alignment(
         text,
         display.bounding_box().center() + Point::new(0, 15),
         character_style,
         Alignment::Center,
     )
-    .draw(&mut display).ok();
+    .draw(&mut display)
+    .ok();
 
     led.set_high().ok();
     display.refresh();

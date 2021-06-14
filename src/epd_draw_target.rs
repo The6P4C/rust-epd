@@ -1,5 +1,5 @@
-use embedded_graphics_core::prelude::*;
 use embedded_graphics_core::pixelcolor::raw::RawU2;
+use embedded_graphics_core::prelude::*;
 
 use crate::epd::*;
 
@@ -14,7 +14,6 @@ impl EpdColor {
     fn black_bit(&self) -> u8 {
         match self {
             EpdColor::Black => 0,
-            EpdColor::Red => 0,
             _ => 1,
         }
     }
